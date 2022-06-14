@@ -1,0 +1,293 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: 面包多 Pay API
+  description: 面包多 Pay API SDK for Go
+  termsOfService: https://mbd.pub/
+  contact:
+    name: mbd API for Go
+    email: ganymedenil@gmail.com
+    url: https://mbd.pub/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api.mianbaoduo.com/
+paths:
+  /release/wx/prepay:
+    post:
+      summary: 微信支付
+      description: 微信支付
+      operationId: wxPrepay
+      requestBody:
+        description: 微信支付请求
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WxPrepayReq'
+      responses:
+        '200':
+          description: 微信支付响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WxPrepayRes'
+        default:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /release/alipay/pay:
+    post:
+      summary: 支付宝支付
+      description: 支付宝支付
+      operationId: alipayPay
+      requestBody:
+        description: 支付宝支付请求
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayPayReq'
+      responses:
+        '200':
+          description: 支付宝支付响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayPayRes'
+        default:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /release/main/refund:
+    post:
+      summary: 退款
+      description: 退款
+      operationId: refund
+      requestBody:
+        description: 退款请求
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundReq'
+      responses:
+        '200':
+          description: 退款响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundRes'
+        default:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /release/main/search_order:
+    post:
+      summary: 订单查询
+      description: 订单查询
+      operationId: searchOrder
+      requestBody:
+        description: 退款请求
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchOrderReq'
+      responses:
+        '200':
+          description: 退款响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchOrderRes'
+        default:
+          description: 错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    WxPrepayReq:
+        required:
+            - app_id
+            - description
+            - amount_total
+            - sign
+        properties:
+          channel:
+            type: string
+            description: 固定为 h5(h5支付该字段为必填)
+          callback_url:
+            type: string
+            description: 支付后跳转地址(JSAPI支付该字段为必填)
+          openid:
+            type: string
+            description: 用户的openid (JSAPI支付该字段为必填)
+          app_id:
+            type: string
+            description: 你的 app_id，可在控制台查看
+          share_code:
+            type: string
+            description: 分账参数，需先开通分账权限
+          description:
+            type: string
+            description: 支付描述，一般为商品名称
+          out_trade_no:
+            type: string
+            description: 订单号，如不填，面包多将随机生成订单号
+          amount_total:
+            type: integer
+            description: 金额，单位为分
+          sign:
+            type: string
+            description: 请求签名
+    WxPrepayRes:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - properties:
+            appId:
+              type: string
+            timeStamp:
+              type: string
+            nonceStr:
+              type: string
+            package:
+              type: string
+            signType:
+              type: string
+            paySign:
+              type: string
+            h5_url:
+              type: string
+    AlipayPayReq:
+      required:
+        - url
+        - app_id
+        - description
+        - amount_total
+        - sign
+      properties:
+        url:
+          type: string
+          description: 支付后跳转的URL地址
+        app_id:
+          type: string
+          description: 你的 app_id，可在控制台查看
+        share_code:
+          type: string
+          description: 分账参数，需先开通分账权限
+        description:
+          type: string
+          description: 支付描述，一般为商品名称
+        amount_total:
+          type: integer
+          description: 金额，单位为分
+        out_trade_no:
+          type: string
+          description: 订单号，如不填，面包多将随机生成订单号
+        callback_url:
+          type: string
+          description: 支付后跳转地址，如不填会只显示「支付成功」
+        sign:
+          type: string
+          description: 请求签名，参照签名算法
+    AlipayPayRes:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - properties:
+            body:
+              type: string
+    RefundReq:
+      required:
+        - order_id
+        - app_id
+        - sign
+      properties:
+        order_id:
+          type: string
+          description: 订单号
+        app_id:
+          type: string
+          description: 你的 app_id，可在控制台查看
+        sign:
+          type: string
+          description: 请求签名，参照签名算法
+    RefundRes:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - properties:
+            info:
+              type: string
+    SearchOrderReq:
+      required:
+        - out_trade_no
+        - app_id
+        - sign
+      properties:
+        out_trade_no:
+          type: string
+          description: 订单号（也支持微信/支付宝流水号）
+        app_id:
+          type: string
+          description: 你的 app_id，可在控制台查看
+        sign:
+          type: string
+          description: 请求签名，参照签名算法
+    SearchOrderRes:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - properties:
+            order_id:
+              type: string
+              description: 订单号
+            charge_id:
+              type: string
+              description: 支付渠道流水号
+            description:
+              type: string
+              description: 商品描述
+            share_id:
+              type: string
+              description: 结算ID
+            share_state:
+              type: integer
+              description: 结算状态
+            amount:
+              type: integer
+              description: 支付金额，单位为分
+            state:
+              type: integer
+              description: 支付状态，0-未支付，1-已支付，2-已结算，3-投诉中，4-投诉完结，5-投诉超时，6-投诉中(买家处理中)
+            create_time:
+              type: integer
+              description: 支付时间（时间戳）
+            payway:
+              type: integer
+              description: 支付渠道，1为微信支付，2为支付宝
+            refund_state:
+              type: integer
+              description: 退款状态，0为无退款，1为部分退款，2为全部退款
+            refund_amount:
+              type: integer
+              description: 已退款金额，单位为分
+            plusinfo:
+              type: string
+              description: 附加参数（json格式）
+    Error:
+      properties:
+        error:
+          type: string
+          description: 错误说明
+        code:
+          type: string
+        message:
+          type: string

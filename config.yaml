@@ -1,0 +1,7 @@
+package: mbdpay
+generate:
+  client: true
+  models: true
+output: mbdpay.gen.go
+output-options:
+  skip-prune: true

@@ -1,0 +1,31 @@
+name: mbdpay sdk for go
+
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: Generate
+        run: go generate ./...
+      - name: Test
+        run: go test -v ./... -race -coverprofile=coverage.txt -covermode=atomic
+        env:
+          APPID: ${{ secrets.APPID }}
+          APPKEY: ${{ secrets.APPKEY }}
+          OPENID: ${{ secrets.OPENID }}
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+      - name: GitHub Push
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'sdk auto generate'
+          author_name: GanymedeNil
+          author_email: ganymedenil@gmail.com
